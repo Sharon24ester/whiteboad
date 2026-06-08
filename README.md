@@ -1,0 +1,187 @@
+Intern ID- CITS2894
+[whiteboard.html](https://github.com/user-attachments/files/28695291/whiteboard.html)
+<img width="1906" height="907" alt="Screenshot 2026-06-08 112505" src="https://github.com/user-attachments/assets/f81c179e-6ce7-43db-8264-3b788945d041" />
+<img width="1912" height="917" alt="Screenshot 2026-06-08 112448" src="https://github.com/user-attachments/assets/9ecbf622-77f2-4169-a690-262c773d2cf6" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Realtime Whiteboard</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#0f172a;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+}
+
+.toolbar{
+    display:flex;
+    gap:10px;
+    padding:15px;
+    background:#1e293b;
+    align-items:center;
+    flex-wrap:wrap;
+    color:white;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#3b82f6;
+    color:white;
+    font-weight:bold;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+input[type="range"]{
+    width:120px;
+}
+
+canvas{
+    flex:1;
+    background:white;
+    cursor:crosshair;
+}
+</style>
+</head>
+
+<body>
+
+<div class="toolbar">
+
+    <label>🎨 Color</label>
+    <input type="color" id="colorPicker" value="#000000">
+
+    <label>📏 Size</label>
+    <input type="range" id="brushSize" min="1" max="30" value="4">
+
+    <button id="penBtn">✏️ Pen</button>
+    <button id="eraserBtn">🧹 Eraser</button>
+    <button id="clearBtn">🗑️ Clear</button>
+    <button id="saveBtn">💾 Save</button>
+
+</div>
+
+<canvas id="board"></canvas>
+
+<script>
+
+const canvas = document.getElementById("board");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - 70;
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+let drawing = false;
+let color = "#000000";
+let brushSize = 4;
+
+ctx.lineCap = "round";
+ctx.lineJoin = "round";
+
+function startDraw(e){
+    drawing = true;
+    draw(e);
+}
+
+function stopDraw(){
+    drawing = false;
+    ctx.beginPath();
+}
+
+function draw(e){
+
+    if(!drawing) return;
+
+    let rect = canvas.getBoundingClientRect();
+
+    let x,y;
+
+    if(e.touches){
+        x = e.touches[0].clientX - rect.left;
+        y = e.touches[0].clientY - rect.top;
+    }else{
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+    }
+
+    ctx.lineWidth = brushSize;
+    ctx.strokeStyle = color;
+
+    ctx.lineTo(x,y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+}
+
+canvas.addEventListener("mousedown",startDraw);
+canvas.addEventListener("mouseup",stopDraw);
+canvas.addEventListener("mouseout",stopDraw);
+canvas.addEventListener("mousemove",draw);
+
+canvas.addEventListener("touchstart",startDraw);
+canvas.addEventListener("touchend",stopDraw);
+canvas.addEventListener("touchmove",draw);
+
+document.getElementById("colorPicker")
+.addEventListener("input",(e)=>{
+    color = e.target.value;
+});
+
+document.getElementById("brushSize")
+.addEventListener("input",(e)=>{
+    brushSize = e.target.value;
+});
+
+document.getElementById("penBtn")
+.addEventListener("click",()=>{
+    color =
+    document.getElementById("colorPicker").value;
+});
+
+document.getElementById("eraserBtn")
+.addEventListener("click",()=>{
+    color = "#FFFFFF";
+});
+
+document.getElementById("clearBtn")
+.addEventListener("click",()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+});
+
+document.getElementById("saveBtn")
+.addEventListener("click",()=>{
+
+    const link = document.createElement("a");
+
+    link.download = "whiteboard.png";
+    link.href = canvas.toDataURL();
+
+    link.click();
+});
+
+</script>
+
+</body>
+</html>
